@@ -1,689 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MP3 → Desmos</title>
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@800&display=swap" rel="stylesheet" />
-  <script src="https://www.desmos.com/api/v1.5/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
-  <style>
-    :root {
-      --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
-      --font-body:    'Satoshi', 'Inter', sans-serif;
-      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
-      --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
-      --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
-      --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
-      --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
-      --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
-      --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
-      --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--radius-full:9999px;
-      --transition-interactive:180ms cubic-bezier(0.16,1,0.3,1);
-      --color-bg:#0d0d11;--color-surface:#13131a;--color-surface-2:#181820;
-      --color-surface-offset:#1e1e28;--color-divider:#252530;--color-border:#2e2e3d;
-      --color-text:#e8e8f0;--color-text-muted:#8888a8;--color-text-faint:#44445a;
-      --color-primary:#7c6af7;--color-primary-hover:#9585fa;--color-primary-active:#5c4ee0;
-      --color-primary-highlight:#1e1c3a;--color-teal:#2dd4bf;
-      --color-success:#4ade80;--color-error:#f87171;--color-warning:#fbbf24;
-      --shadow-sm:0 1px 2px oklch(0 0 0/0.3);--shadow-md:0 4px 12px oklch(0 0 0/0.4);
-      --shadow-lg:0 12px 32px oklch(0 0 0/0.5);
-      --shadow-glow:0 0 24px oklch(0.55 0.22 270/0.25);
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
-    body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);display:flex;flex-direction:column}
-    img,canvas,svg{display:block;max-width:100%}
-    button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
-    a,button,[role="button"],input{transition:color var(--transition-interactive),background var(--transition-interactive),border-color var(--transition-interactive),box-shadow var(--transition-interactive),opacity var(--transition-interactive)}
-    :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
-    @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-    ::-webkit-scrollbar{width:6px;height:6px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:var(--radius-full)}
-
-    .app-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-8);border-bottom:1px solid var(--color-divider);background:oklch(from var(--color-bg) l c h/0.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
-    .logo{display:flex;align-items:center;gap:var(--space-3);font-family:var(--font-display);font-size:var(--text-lg);font-weight:800;letter-spacing:-0.02em;text-decoration:none;color:var(--color-text)}
-    .logo-icon{width:32px;height:32px}
-    .logo span.accent{color:var(--color-primary)}
-    .badge{font-size:var(--text-xs);padding:2px var(--space-2);border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid oklch(from var(--color-primary) l c h/0.25);font-weight:500}
-
-    .main-content{flex:1;display:grid;grid-template-columns:380px 1fr;height:calc(100dvh - 61px);overflow:hidden}
-
-    .left-panel{background:var(--color-surface);border-right:1px solid var(--color-divider);display:flex;flex-direction:column;overflow-y:auto;padding:var(--space-6);gap:var(--space-6)}
-    .panel-section-title{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-3)}
-
-    .drop-zone{border:2px dashed var(--color-border);border-radius:var(--radius-xl);padding:var(--space-8) var(--space-6);text-align:center;cursor:pointer;background:var(--color-surface-2);position:relative;overflow:hidden;transition:border-color var(--transition-interactive),background var(--transition-interactive),box-shadow var(--transition-interactive)}
-    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--color-primary);background:var(--color-primary-highlight);box-shadow:var(--shadow-glow)}
-    .drop-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-    .drop-zone-icon{width:48px;height:48px;margin:0 auto var(--space-3);color:var(--color-primary);opacity:.8}
-    .drop-zone-title{font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-1)}
-    .drop-zone-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
-
-    .file-info{display:none;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);gap:var(--space-3);align-items:center}
-    .file-info.visible{display:flex}
-    .file-info-icon{width:36px;height:36px;flex-shrink:0;background:var(--color-primary-highlight);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--color-primary)}
-    .file-info-details{flex:1;min-width:0}
-    .file-info-name{font-size:var(--text-sm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .file-info-meta{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
-    .file-remove{color:var(--color-text-faint);padding:var(--space-1);border-radius:var(--radius-sm)}
-    .file-remove:hover{color:var(--color-error)}
-
-    .settings-grid{display:grid;gap:var(--space-4)}
-    .setting-row{display:flex;flex-direction:column;gap:var(--space-2)}
-    .setting-label{font-size:var(--text-sm);font-weight:500;color:var(--color-text);display:flex;justify-content:space-between;align-items:center}
-    .setting-value{font-size:var(--text-xs);color:var(--color-primary);font-weight:600;min-width:2.5ch;text-align:right}
-    input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:var(--radius-full);background:var(--color-border);outline:none}
-    input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:var(--radius-full);background:var(--color-primary);cursor:pointer;box-shadow:0 0 8px oklch(from var(--color-primary) l c h/0.5);transition:box-shadow var(--transition-interactive),transform var(--transition-interactive)}
-    input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 0 12px oklch(from var(--color-primary) l c h/0.7)}
-    input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:var(--radius-full);background:var(--color-primary);border:none;cursor:pointer}
-    .setting-hint{font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.4}
-
-    select{width:100%;padding:var(--space-2) var(--space-3);background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text);font-size:var(--text-sm);font-family:var(--font-body);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238888a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right var(--space-3) center;padding-right:var(--space-8)}
-    select:hover{border-color:var(--color-primary)}
-    select:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px oklch(from var(--color-primary) l c h/0.15)}
-
-    .btn-analyze{width:100%;padding:var(--space-3) var(--space-6);background:var(--color-primary);color:#fff;border-radius:var(--radius-lg);font-family:var(--font-body);font-size:var(--text-sm);font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:var(--space-2);box-shadow:0 4px 16px oklch(from var(--color-primary) l c h/0.35);transition:background var(--transition-interactive),box-shadow var(--transition-interactive),transform var(--transition-interactive)}
-    .btn-analyze:hover:not(:disabled){background:var(--color-primary-hover);box-shadow:0 6px 24px oklch(from var(--color-primary) l c h/0.5);transform:translateY(-1px)}
-    .btn-analyze:active:not(:disabled){transform:translateY(0)}
-    .btn-analyze:disabled{opacity:.45;cursor:not-allowed}
-
-    .progress-wrap{display:none;flex-direction:column;gap:var(--space-2)}
-    .progress-wrap.visible{display:flex}
-    .progress-label{font-size:var(--text-xs);color:var(--color-text-muted);display:flex;justify-content:space-between}
-    .progress-bar-track{height:4px;background:var(--color-border);border-radius:var(--radius-full);overflow:hidden}
-    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--color-primary),var(--color-teal));border-radius:var(--radius-full);width:0%;transition:width .3s ease}
-
-    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
-    .stat-card{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4)}
-    .stat-label{font-size:var(--text-xs);color:var(--color-text-muted)}
-    .stat-value{font-size:var(--text-base);font-weight:700;color:var(--color-text);margin-top:2px}
-    .stat-value.accent{color:var(--color-primary)}
-
-    .waveform-wrap,.spectrum-wrap{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--color-border);background:var(--color-surface-offset);position:relative}
-    #waveformCanvas,#spectrumCanvas{width:100%;height:80px;display:block}
-    .waveform-placeholder{display:flex;align-items:center;justify-content:center;height:80px;color:var(--color-text-faint);font-size:var(--text-xs)}
-
-    .equations-list{display:flex;flex-direction:column;gap:var(--space-2);max-height:200px;overflow-y:auto;padding-right:var(--space-1)}
-    .equations-list::-webkit-scrollbar{width:4px}
-    .equations-list::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:var(--radius-full)}
-    .equation-item{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-xs);font-family:'Courier New',monospace;color:var(--color-text-muted);animation:slideIn .2s ease forwards}
-    @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-    .eq-color-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .eq-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .eq-freq{color:var(--color-teal);font-weight:600;flex-shrink:0}
-    .equations-empty{text-align:center;padding:var(--space-6);color:var(--color-text-faint);font-size:var(--text-xs)}
-
-    .btn-export{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);background:transparent;border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted)}
-    .btn-export:hover{border-color:var(--color-primary);color:var(--color-primary)}
-    .export-row{display:flex;gap:var(--space-2)}
-
-    .right-panel{display:flex;flex-direction:column;background:var(--color-bg);position:relative}
-    .desmos-toolbar{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--color-divider);gap:var(--space-4);flex-shrink:0}
-    .desmos-toolbar-left{display:flex;align-items:center;gap:var(--space-3)}
-    .graph-title{font-size:var(--text-sm);font-weight:600;color:var(--color-text)}
-    .graph-subtitle{font-size:var(--text-xs);color:var(--color-text-muted)}
-    .toolbar-btn{display:flex;align-items:center;gap:var(--space-1);padding:var(--space-1) var(--space-3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted)}
-    .toolbar-btn:hover{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-primary-highlight)}
-    .toolbar-btn.active{background:var(--color-primary-highlight);border-color:var(--color-primary);color:var(--color-primary)}
-    #calculator{flex:1;width:100%}
-    .desmos-empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-4);pointer-events:none;z-index:10;background:var(--color-bg)}
-    .desmos-empty-state.hidden{display:none}
-    .empty-icon{width:64px;height:64px;color:var(--color-text-faint);opacity:.5}
-    .empty-title{font-size:var(--text-lg);font-weight:700;font-family:var(--font-display);color:var(--color-text-muted)}
-    .empty-sub{font-size:var(--text-sm);color:var(--color-text-faint);max-width:30ch;text-align:center;line-height:1.5}
-
-    .toast{position:fixed;bottom:var(--space-6);right:var(--space-6);padding:var(--space-3) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);font-size:var(--text-sm);color:var(--color-text);box-shadow:var(--shadow-lg);z-index:200;display:flex;align-items:center;gap:var(--space-3);transform:translateY(80px);opacity:0;transition:transform .3s cubic-bezier(0.16,1,0.3,1),opacity .3s ease}
-    .toast.show{transform:translateY(0);opacity:1}
-    .toast-dot{width:8px;height:8px;border-radius:50%;background:var(--color-success);flex-shrink:0}
-    .toast-dot.error{background:var(--color-error)}
-
-    @media (max-width:768px){
-      .main-content{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;overflow:visible}
-      .left-panel{max-height:60vh}
-      #calculator{min-height:60vh}
-      .app-header{padding:var(--space-3) var(--space-4)}
-      .desmos-toolbar{flex-wrap:wrap;gap:var(--space-2)}
-    }
-  </style>
+  <title>Audio to Desmos</title>
+  <meta name="description" content="Convert short audio clips into lightweight Desmos-friendly Fourier-style equations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+  <script defer src="./js/app.js"></script>
 </head>
 <body>
-
-<header class="app-header">
-  <a class="logo" href="#">
-    <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AudioToDesmos">
-      <rect width="32" height="32" rx="8" fill="#7c6af7" opacity="0.15"/>
-      <path d="M6 16 Q9 8 12 16 Q15 24 18 16 Q21 8 24 16" stroke="#7c6af7" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <circle cx="26" cy="16" r="2.5" fill="#2dd4bf"/>
-      <circle cx="6"  cy="16" r="2.5" fill="#2dd4bf"/>
-    </svg>
-    Audio<span class="accent">→</span>Desmos
-  </a>
-  <span class="badge">v1.0</span>
-</header>
-
-<main class="main-content">
-  <aside class="left-panel">
-
-    <!-- Upload -->
-    <div>
-      <p class="panel-section-title">1 · Upload Audio</p>
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".mp3,.wav,.ogg,.flac,.aac,.m4a" />
-        <svg class="drop-zone-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <path d="M24 8v24M14 18l10-10 10 10"/>
-          <rect x="8" y="32" width="32" height="10" rx="3"/>
-          <path d="M18 37h4m4 0h4" stroke-width="1.5"/>
-        </svg>
-        <p class="drop-zone-title">Drop MP3 / WAV / OGG here</p>
-        <p class="drop-zone-sub">or click to browse · any common audio format</p>
-      </div>
-      <div class="file-info" id="fileInfo">
-        <div class="file-info-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        </div>
-        <div class="file-info-details">
-          <div class="file-info-name" id="fileName">—</div>
-          <div class="file-info-meta" id="fileMeta">—</div>
-        </div>
-        <button class="file-remove" id="fileRemove" aria-label="Remove file">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Waveform -->
-    <div>
-      <p class="panel-section-title">Waveform Preview</p>
-      <div class="waveform-wrap">
-        <canvas id="waveformCanvas" width="340" height="80"></canvas>
-        <div class="waveform-placeholder" id="waveformPlaceholder">Upload a file to preview</div>
-      </div>
-    </div>
-
-    <!-- Settings -->
-    <div>
-      <p class="panel-section-title">2 · Settings</p>
-      <div class="settings-grid">
-        <div class="setting-row">
-          <label class="setting-label" for="harmonicsSlider">
-            Harmonics (top frequencies)
-            <span class="setting-value" id="harmonicsVal">30</span>
-          </label>
-          <input type="range" id="harmonicsSlider" min="5" max="80" value="30" />
-          <p class="setting-hint">More harmonics = richer approximation, slower graph</p>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="fftSizeSelect">FFT Resolution</label>
-          <select id="fftSizeSelect">
-            <option value="1024">1024 — Fast</option>
-            <option value="2048" selected>2048 — Balanced</option>
-            <option value="4096">4096 — Precise</option>
-            <option value="8192">8192 — Ultra</option>
-          </select>
-          <p class="setting-hint">Higher = more frequency detail, longer analysis</p>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="analysisWindow">
-            Analysis window
-            <span class="setting-value" id="windowVal">2.0s</span>
-          </label>
-          <input type="range" id="analysisWindow" min="0.5" max="8" step="0.5" value="2" />
-          <p class="setting-hint">How many seconds of audio to analyze</p>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="waveType">Wave function</label>
-          <select id="waveType">
-            <option value="sin" selected>sin (sine waves)</option>
-            <option value="cos">cos (cosine waves)</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Analyze Button -->
-    <div>
-      <button class="btn-analyze" id="analyzeBtn" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
-        Analyze &amp; Generate Graph
-      </button>
-      <div class="progress-wrap" id="progressWrap" style="margin-top:var(--space-3)">
-        <div class="progress-label">
-          <span id="progressLabel">Decoding audio…</span>
-          <span id="progressPct">0%</span>
-        </div>
-        <div class="progress-bar-track">
-          <div class="progress-bar-fill" id="progressFill"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div id="statsSection" style="display:none">
-      <p class="panel-section-title">Analysis Results</p>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Duration</div><div class="stat-value" id="statDuration">—</div></div>
-        <div class="stat-card"><div class="stat-label">Sample Rate</div><div class="stat-value" id="statSampleRate">—</div></div>
-        <div class="stat-card"><div class="stat-label">Harmonics</div><div class="stat-value accent" id="statHarmonics">—</div></div>
-        <div class="stat-card"><div class="stat-label">Peak Freq</div><div class="stat-value accent" id="statPeakFreq">—</div></div>
-      </div>
-    </div>
-
-    <!-- Spectrum -->
-    <div id="spectrumSection" style="display:none">
-      <p class="panel-section-title">Frequency Spectrum</p>
-      <div class="spectrum-wrap">
-        <canvas id="spectrumCanvas" width="340" height="80"></canvas>
-      </div>
-    </div>
-
-    <!-- Equations List -->
-    <div>
-      <p class="panel-section-title">Generated Equations</p>
-      <div class="equations-list" id="equationsList">
-        <div class="equations-empty">Equations will appear here after analysis</div>
-      </div>
-      <div class="export-row" style="margin-top:var(--space-3)">
-        <button class="btn-export" id="exportLatexBtn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export .tex
-        </button>
-        <button class="btn-export" id="copyEquationsBtn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy All
-        </button>
-      </div>
-    </div>
-
-  </aside>
-
-  <section class="right-panel">
-    <div class="desmos-toolbar">
-      <div class="desmos-toolbar-left">
-        <div>
-          <div class="graph-title" id="graphTitle">Fourier Series Graph</div>
-          <div class="graph-subtitle" id="graphSubtitle">Upload &amp; analyze a file to populate</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:var(--space-2)">
-        <button class="toolbar-btn active" id="toggleSumBtn" title="Toggle sum curve">∑ Sum</button>
-        <button class="toolbar-btn active" id="togglePartialsBtn" title="Toggle partial waves">~ Partials</button>
-        <button class="toolbar-btn" id="clearGraphBtn" title="Clear graph">✕ Clear</button>
-      </div>
-    </div>
-    <div id="calculator"></div>
-    <div class="desmos-empty-state" id="emptyState">
-      <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-        <path d="M8 32 Q16 12 24 32 Q32 52 40 32 Q48 12 56 32"/>
-        <circle cx="32" cy="32" r="3" fill="currentColor" stroke="none" opacity="0.4"/>
+  <a class="skip-link" href="#main">Skip to app</a>
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-label="Audio to Desmos logo" role="img">
+        <rect x="2" y="2" width="44" height="44" rx="12" fill="currentColor" opacity="0.08"></rect>
+        <path d="M9 24c3-9 6-9 9 0s6 9 9 0 6-9 12 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+        <circle cx="38" cy="24" r="3" fill="currentColor"></circle>
       </svg>
-      <p class="empty-title">No graph yet</p>
-      <p class="empty-sub">Drop an audio file and click <strong>Analyze</strong> to generate a Fourier series graph in Desmos</p>
+      <div>
+        <p class="eyebrow">Stable v2</p>
+        <h1>Audio to Desmos</h1>
+      </div>
     </div>
-  </section>
-</main>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">◐</button>
+  </header>
 
-<div class="toast" id="toast">
-  <div class="toast-dot" id="toastDot"></div>
-  <span id="toastMsg">Done!</span>
-</div>
+  <main id="main" class="app-shell">
+    <section class="hero card">
+      <div>
+        <p class="eyebrow">Portfolio-ready demo</p>
+        <h2>Turn a short audio clip into Desmos-safe trig equations.</h2>
+        <p class="hero-copy">This version is intentionally constrained so it does not melt the browser: it only analyzes a short mono slice, uses a lightweight frequency estimation step, and caps the number of generated expressions.</p>
+      </div>
+      <div class="hero-points">
+        <div class="mini-stat"><span>Clip limit</span><strong>8 sec</strong></div>
+        <div class="mini-stat"><span>Harmonics</span><strong>6–16</strong></div>
+        <div class="mini-stat"><span>Output</span><strong>1 sum + partials</strong></div>
+      </div>
+    </section>
 
-<script>
-// ── State ──────────────────────────────────────────────────────────────────
-let audioFile = null, audioBuffer = null, calculator = null, analysisData = null;
-let showSum = true, showPartials = true;
+    <section class="workspace">
+      <aside class="controls card">
+        <div class="section-head">
+          <p class="eyebrow">Upload</p>
+          <h3>Choose audio</h3>
+        </div>
 
-const COLORS = [
-  '#7c6af7','#2dd4bf','#f472b6','#fb923c','#34d399',
-  '#60a5fa','#a78bfa','#f9a8d4','#86efac','#fde68a',
-  '#c4b5fd','#5eead4','#fca5a5','#a5f3fc','#bbf7d0',
-  '#818cf8','#38bdf8','#e879f9','#4ade80','#facc15'
-];
+        <label class="dropzone" id="dropzone">
+          <input id="audioFile" type="file" accept="audio/*" />
+          <span class="dropzone-title">Drop an audio file here</span>
+          <span class="dropzone-sub">MP3, WAV, OGG, M4A. Short clips work best.</span>
+        </label>
 
-window.addEventListener('DOMContentLoaded', () => {
-  const elt = document.getElementById('calculator');
-  calculator = Desmos.GraphingCalculator(elt, {
-    expressionsCollapsed: false,
-    settingsMenu: true,
-    zoomButtons: true,
-    border: false,
-    invertedColors: true
-  });
-  initDropZone();
-  initControls();
-});
+        <div class="file-card" id="fileCard" hidden>
+          <div>
+            <p id="fileName" class="file-name"></p>
+            <p id="fileMeta" class="file-meta"></p>
+          </div>
+          <button id="clearFile" class="ghost-btn" type="button">Remove</button>
+        </div>
 
-// ── Drop Zone ──────────────────────────────────────────────────────────────
-function initDropZone() {
-  const dz = document.getElementById('dropZone');
-  const inp = document.getElementById('fileInput');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('drag-over');
-    const f = e.dataTransfer.files[0]; if (f) loadFile(f);
-  });
-  inp.addEventListener('change', () => { if (inp.files[0]) loadFile(inp.files[0]); });
-  document.getElementById('fileRemove').addEventListener('click', resetFile);
-}
+        <div class="field-group">
+          <label for="clipLength">Clip length <span id="clipLengthValue">4.0s</span></label>
+          <input id="clipLength" type="range" min="1" max="8" step="0.5" value="4" />
+          <p class="hint">Only the start of the file is analyzed for stability.</p>
+        </div>
 
-function resetFile() {
-  audioFile = null; audioBuffer = null;
-  document.getElementById('fileInfo').classList.remove('visible');
-  document.getElementById('dropZone').style.display = '';
-  document.getElementById('analyzeBtn').disabled = true;
-  clearWaveform();
-  document.getElementById('statsSection').style.display = 'none';
-  document.getElementById('spectrumSection').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-}
+        <div class="field-group">
+          <label for="harmonicCount">Harmonics <span id="harmonicCountValue">10</span></label>
+          <input id="harmonicCount" type="range" min="6" max="16" step="1" value="10" />
+          <p class="hint">Lower values keep Desmos responsive.</p>
+        </div>
 
-function loadFile(file) {
-  audioFile = file;
-  const sizeMB = (file.size / 1048576).toFixed(1);
-  document.getElementById('fileName').textContent = file.name;
-  document.getElementById('fileMeta').textContent = sizeMB + ' MB · ' + (file.type || 'audio');
-  document.getElementById('fileInfo').classList.add('visible');
-  document.getElementById('analyzeBtn').disabled = false;
-  decodeAndPreview(file);
-}
+        <div class="field-group">
+          <label for="waveFunction">Wave function</label>
+          <select id="waveFunction">
+            <option value="sin">sin</option>
+            <option value="cos">cos</option>
+          </select>
+        </div>
 
-async function decodeAndPreview(file) {
-  try {
-    const ab = await file.arrayBuffer();
-    const actx = new (window.AudioContext || window.webkitAudioContext)();
-    audioBuffer = await actx.decodeAudioData(ab);
-    drawWaveform(audioBuffer);
-    document.getElementById('waveformPlaceholder').style.display = 'none';
-  } catch(e) { console.warn('Preview error', e); }
-}
+        <div class="actions">
+          <button id="analyzeBtn" class="primary-btn" type="button" disabled>Analyze clip</button>
+          <button id="copyBtn" class="secondary-btn" type="button" disabled>Copy equations</button>
+        </div>
 
-function drawWaveform(buffer) {
-  const canvas = document.getElementById('waveformCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-  const data = buffer.getChannelData(0);
-  const step = Math.ceil(data.length / W);
-  const mid = H / 2;
-  const grad = ctx.createLinearGradient(0, 0, W, 0);
-  grad.addColorStop(0, '#7c6af7'); grad.addColorStop(0.5, '#2dd4bf'); grad.addColorStop(1, '#7c6af7');
-  ctx.strokeStyle = grad; ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  for (let i = 0; i < W; i++) {
-    let mn = 1, mx = -1;
-    for (let j = 0; j < step; j++) { const v = data[i*step+j]||0; if(v<mn)mn=v; if(v>mx)mx=v; }
-    ctx.moveTo(i, mid + mx * mid * 0.92);
-    ctx.lineTo(i, mid + mn * mid * 0.92);
-  }
-  ctx.stroke();
-}
+        <div class="status" id="statusBox" aria-live="polite">Upload a file to begin.</div>
 
-function clearWaveform() {
-  const c = document.getElementById('waveformCanvas');
-  c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  document.getElementById('waveformPlaceholder').style.display = 'flex';
-}
+        <div class="visual-box">
+          <div class="section-head compact">
+            <p class="eyebrow">Waveform</p>
+            <h3>Preview</h3>
+          </div>
+          <canvas id="waveform" width="360" height="100"></canvas>
+        </div>
 
-// ── Controls ───────────────────────────────────────────────────────────────
-function initControls() {
-  const hs = document.getElementById('harmonicsSlider');
-  hs.addEventListener('input', () => document.getElementById('harmonicsVal').textContent = hs.value);
-  const ws = document.getElementById('analysisWindow');
-  ws.addEventListener('input', () => document.getElementById('windowVal').textContent = parseFloat(ws.value).toFixed(1)+'s');
-  document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
-  document.getElementById('toggleSumBtn').addEventListener('click', () => {
-    showSum = !showSum;
-    document.getElementById('toggleSumBtn').classList.toggle('active', showSum);
-    if (analysisData) updateVisibility();
-  });
-  document.getElementById('togglePartialsBtn').addEventListener('click', () => {
-    showPartials = !showPartials;
-    document.getElementById('togglePartialsBtn').classList.toggle('active', showPartials);
-    if (analysisData) updateVisibility();
-  });
-  document.getElementById('clearGraphBtn').addEventListener('click', () => {
-    calculator.setBlank(); analysisData = null;
-    document.getElementById('emptyState').classList.remove('hidden');
-    document.getElementById('equationsList').innerHTML = '<div class="equations-empty">Equations will appear here after analysis</div>';
-    document.getElementById('graphSubtitle').textContent = 'Upload & analyze a file to populate';
-    document.getElementById('statsSection').style.display = 'none';
-    document.getElementById('spectrumSection').style.display = 'none';
-  });
-  document.getElementById('exportLatexBtn').addEventListener('click', exportLatex);
-  document.getElementById('copyEquationsBtn').addEventListener('click', copyEquations);
-}
+        <div class="stats-grid">
+          <article class="stat-tile"><span>Duration</span><strong id="durationStat">—</strong></article>
+          <article class="stat-tile"><span>Sample rate</span><strong id="sampleRateStat">—</strong></article>
+          <article class="stat-tile"><span>Peak freq</span><strong id="peakStat">—</strong></article>
+          <article class="stat-tile"><span>Terms</span><strong id="termsStat">—</strong></article>
+        </div>
+      </aside>
 
-// ── Analysis ──────────────────────────────────────────────────────────────
-async function runAnalysis() {
-  if (!audioFile) return;
-  const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  setProgress(true, 'Decoding audio…', 5);
-  try {
-    let buffer = audioBuffer;
-    if (!buffer) {
-      const ab = await audioFile.arrayBuffer();
-      const actx = new (window.AudioContext || window.webkitAudioContext)();
-      buffer = await actx.decodeAudioData(ab);
-      audioBuffer = buffer;
-    }
-    setProgress(true, 'Running FFT analysis…', 20);
-    await sleep(30);
+      <section class="graph-panel card">
+        <div class="graph-topbar">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h3>Desmos graph</h3>
+          </div>
+          <div class="toggle-row">
+            <button id="toggleSum" class="pill-btn active" type="button">Sum</button>
+            <button id="togglePartials" class="pill-btn active" type="button">Partials</button>
+            <button id="resetGraph" class="pill-btn" type="button">Reset</button>
+          </div>
+        </div>
+        <div id="calculator" class="calculator"></div>
+      </section>
+    </section>
 
-    const harmonics = parseInt(document.getElementById('harmonicsSlider').value);
-    const fftSize   = parseInt(document.getElementById('fftSizeSelect').value);
-    const winSec    = parseFloat(document.getElementById('analysisWindow').value);
-    const waveFunc  = document.getElementById('waveType').value;
-
-    setProgress(true, 'Computing frequency peaks…', 40);
-    await sleep(30);
-    const result = computeFFT(buffer, harmonics, fftSize, winSec);
-
-    setProgress(true, 'Building Desmos equations…', 65);
-    await sleep(30);
-    analysisData = { result, waveFunc };
-    populateDesmos(result, waveFunc);
-
-    setProgress(true, 'Finalizing…', 88);
-    await sleep(200);
-
-    updateStats(buffer, result);
-    renderSpectrum(result);
-    renderEquationsList(result, waveFunc);
-    document.getElementById('emptyState').classList.add('hidden');
-    document.getElementById('graphTitle').textContent = audioFile.name.replace(/\.[^.]+$/, '');
-    document.getElementById('graphSubtitle').textContent = result.peaks.length + ' harmonics · Fourier approximation';
-    setProgress(false);
-    showToast('Generated ' + result.peaks.length + ' harmonic equations', false);
-  } catch(e) {
-    console.error(e);
-    setProgress(false);
-    showToast('Error: ' + (e.message || 'Could not analyze audio'), true);
-  } finally { btn.disabled = false; }
-}
-
-function computeFFT(buffer, harmonics, fftSize, winSec) {
-  const sr = buffer.sampleRate;
-  const raw = buffer.getChannelData(0);
-  const maxN = Math.min(raw.length, Math.floor(sr * winSec));
-
-  // Apply Hann window
-  const N = Math.min(fftSize, maxN);
-  const w = new Float64Array(N);
-  for (let i = 0; i < N; i++) {
-    const hann = 0.5 * (1 - Math.cos(2 * Math.PI * i / (N - 1)));
-    w[i] = (raw[i] || 0) * hann;
-  }
-
-  // Downsample for DFT speed
-  const ds = Math.max(1, Math.floor(N / 1024));
-  const dsN = Math.floor(N / ds);
-  const dsData = new Float64Array(dsN);
-  for (let i = 0; i < dsN; i++) dsData[i] = w[i * ds] || 0;
-
-  const effectiveSR = sr / ds;
-  const freqBins = [];
-  for (let k = 1; k < dsN / 2; k++) {
-    const freq = k * effectiveSR / dsN;
-    if (freq < 20 || freq > 18000) continue;
-    let re = 0, im = 0;
-    for (let n = 0; n < dsN; n++) {
-      const a = -2 * Math.PI * k * n / dsN;
-      re += dsData[n] * Math.cos(a);
-      im += dsData[n] * Math.sin(a);
-    }
-    const mag = Math.sqrt(re*re + im*im) / dsN;
-    if (mag > 1e-7) freqBins.push({ freq, amp: mag, phase: Math.atan2(im, re) });
-  }
-
-  freqBins.sort((a, b) => b.amp - a.amp);
-  const peaks = freqBins.slice(0, harmonics);
-  const maxA = peaks[0]?.amp || 1;
-  peaks.forEach(p => { p.ampNorm = p.amp / maxA; });
-
-  return { peaks, sampleRate: sr, duration: buffer.duration };
-}
-
-// ── Desmos ────────────────────────────────────────────────────────────────
-function populateDesmos({ peaks }, waveFunc) {
-  calculator.setBlank();
-  const exprs = [];
-
-  peaks.forEach((p, i) => {
-    const A = p.ampNorm.toFixed(5);
-    // Scale: x represents time in ms-like units; omega scales freq to nice graph units
-    const omega = (2 * Math.PI * p.freq / 1000).toFixed(5);
-    const phi = p.phase.toFixed(5);
-    exprs.push({
-      id: 'h' + i,
-      latex: 'h_{' + (i+1) + '}(x)=' + A + '\\\\' + waveFunc + '(' + omega + 'x+' + phi + ')',
-      color: COLORS[i % COLORS.length],
-      hidden: !showPartials,
-      lineStyle: Desmos.Styles.DASHED
-    });
-  });
-
-  if (peaks.length > 0) {
-    const sumParts = peaks.map((_, i) => 'h_{' + (i+1) + '}(x)').join('+');
-    exprs.push({
-      id: 'fsum',
-      latex: 'f(x)=' + sumParts,
-      color: '#ffffff',
-      hidden: !showSum,
-      lineStyle: Desmos.Styles.SOLID
-    });
-  }
-
-  calculator.setExpressions(exprs);
-  calculator.setMathBounds({ left: -4, right: 4, bottom: -2.2, top: 2.2 });
-}
-
-function updateVisibility() {
-  const { result } = analysisData;
-  result.peaks.forEach((_, i) => calculator.setExpression({ id: 'h' + i, hidden: !showPartials }));
-  calculator.setExpression({ id: 'fsum', hidden: !showSum });
-}
-
-// ── Stats ─────────────────────────────────────────────────────────────────
-function updateStats(buffer, result) {
-  document.getElementById('statsSection').style.display = '';
-  document.getElementById('statDuration').textContent = buffer.duration.toFixed(2) + 's';
-  document.getElementById('statSampleRate').textContent = (buffer.sampleRate/1000).toFixed(1) + ' kHz';
-  document.getElementById('statHarmonics').textContent = result.peaks.length;
-  const top = result.peaks[0];
-  document.getElementById('statPeakFreq').textContent = top ? top.freq.toFixed(0) + ' Hz' : '—';
-}
-
-function renderSpectrum({ peaks }) {
-  document.getElementById('spectrumSection').style.display = '';
-  const c = document.getElementById('spectrumCanvas');
-  const ctx = c.getContext('2d');
-  const W = c.width, H = c.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#13131a'; ctx.fillRect(0,0,W,H);
-  if (!peaks.length) return;
-  const maxF = peaks.reduce((m,p)=>Math.max(m,p.freq),0) * 1.15;
-  const maxA = peaks[0].amp;
-  peaks.forEach((p, i) => {
-    const x = (p.freq / maxF) * W;
-    const bH = (p.amp / maxA) * (H - 10);
-    ctx.fillStyle = COLORS[i % COLORS.length] + 'bb';
-    ctx.fillRect(x - 2, H - bH, 4, bH);
-    ctx.fillStyle = COLORS[i % COLORS.length];
-    ctx.fillRect(x - 1, H - bH - 2, 2, 2);
-  });
-  ctx.fillStyle = '#44445a'; ctx.font = '9px sans-serif';
-  ctx.fillText('20 Hz', 2, H-2);
-  ctx.fillText(Math.round(maxF) + ' Hz', W-45, H-2);
-}
-
-function renderEquationsList({ peaks }, waveFunc) {
-  const list = document.getElementById('equationsList');
-  list.innerHTML = '';
-  peaks.forEach((p, i) => {
-    const item = document.createElement('div');
-    item.className = 'equation-item';
-    item.style.animationDelay = (i * 12) + 'ms';
-    const dot = document.createElement('div');
-    dot.className = 'eq-color-dot'; dot.style.background = COLORS[i % COLORS.length];
-    const txt = document.createElement('div');
-    txt.className = 'eq-text';
-    txt.textContent = p.ampNorm.toFixed(3) + '\u00b7' + waveFunc + '(\u03c9x+' + p.phase.toFixed(2) + ')';
-    const frq = document.createElement('div');
-    frq.className = 'eq-freq'; frq.textContent = p.freq.toFixed(1) + ' Hz';
-    item.append(dot, txt, frq); list.appendChild(item);
-  });
-}
-
-// ── Export ────────────────────────────────────────────────────────────────
-function exportLatex() {
-  if (!analysisData) { showToast('Analyze a file first', true); return; }
-  const { result, waveFunc } = analysisData;
-  let out = '% Fourier Series from Audio - AudioToDesmos\n% File: ' + (audioFile?.name||'unknown') + '\n\n';
-  result.peaks.forEach((p, i) => {
-    const A = p.ampNorm.toFixed(5), omega = (2*Math.PI*p.freq/1000).toFixed(5), phi = p.phase.toFixed(5);
-    out += 'h_{' + (i+1) + '}(x) = ' + A + '\\' + waveFunc + '(' + omega + 'x + ' + phi + ')\n';
-  });
-  out += '\nf(x) = ' + result.peaks.map((_,i)=>'h_{'+(i+1)+'}(x)').join(' + ');
-  const blob = new Blob([out], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (audioFile?.name?.replace(/\.[^.]+$/, '') || 'audio') + '_fourier.tex';
-  a.click();
-  showToast('LaTeX file saved', false);
-}
-
-function copyEquations() {
-  if (!analysisData) { showToast('Analyze a file first', true); return; }
-  const { result, waveFunc } = analysisData;
-  const lines = result.peaks.map((p, i) => {
-    const A = p.ampNorm.toFixed(5), omega = (2*Math.PI*p.freq/1000).toFixed(5), phi = p.phase.toFixed(5);
-    return 'h_{' + (i+1) + '}(x) = ' + A + '\\' + waveFunc + '(' + omega + 'x + ' + phi + ')';
-  });
-  lines.push('f(x) = ' + result.peaks.map((_,i)=>'h_{'+(i+1)+'}(x)').join(' + '));
-  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Copied to clipboard', false));
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────────
-function setProgress(visible, label, pct) {
-  const w = document.getElementById('progressWrap');
-  w.classList.toggle('visible', visible);
-  if (visible) {
-    document.getElementById('progressLabel').textContent = label;
-    document.getElementById('progressPct').textContent = pct + '%';
-    document.getElementById('progressFill').style.width = pct + '%';
-  }
-}
-
-function showToast(msg, err) {
-  const t = document.getElementById('toast');
-  document.getElementById('toastDot').className = 'toast-dot' + (err ? ' error' : '');
-  document.getElementById('toastMsg').textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-</script>
+    <section class="equations card">
+      <div class="section-head">
+        <p class="eyebrow">Equations</p>
+        <h3>Generated terms</h3>
+      </div>
+      <p class="equation-note">The app creates a small set of dominant-frequency terms plus one summed function, which is much safer than dumping dozens of heavy equations into Desmos.</p>
+      <pre id="equationOutput" class="equation-output">No equations yet.</pre>
+    </section>
+  </main>
 </body>
 </html>
